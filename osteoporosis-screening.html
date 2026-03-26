@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OsteoScan Pro – Real-Time Osteoporosis Screening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+<style>
+  /* ─── Reset & Variables ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0d2b45;
+    --teal:   #0e7f74;
+    --teal-l: #12a898;
+    --sky:    #e8f6f4;
+    --mint:   #d0f0ea;
+    --cream:  #f7fbfa;
+    --white:  #ffffff;
+    --ink:    #0d2b45;
+    --muted:  #5a7a8a;
+    --border: rgba(14,127,116,.15);
+    --shadow: 0 8px 40px rgba(13,43,69,.10);
+    --radius: 16px;
+    --font-head: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --max: 1140px;
+    --ease: cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--white);
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  img { display: block; max-width: 100%; }
+  a   { text-decoration: none; color: inherit; }
+  ul  { list-style: none; }
+
+  /* ─── Utility ──────────────────────────────────────────────── */
+  .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .section-label {
+    display: inline-block;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    background: var(--mint);
+    padding: 5px 14px;
+    border-radius: 99px;
+    margin-bottom: 18px;
+  }
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    line-height: 1.2;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 560px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 30px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), background .2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: var(--teal);
+    color: #fff;
+    box-shadow: 0 6px 28px rgba(14,127,116,.35);
+  }
+  .btn-primary:hover { background: var(--teal-l); box-shadow: 0 10px 36px rgba(14,127,116,.45); }
+  .btn-outline {
+    background: transparent;
+    color: var(--teal);
+    border: 2px solid var(--teal);
+  }
+  .btn-outline:hover { background: var(--mint); }
+  .btn-ghost {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,.4);
+    backdrop-filter: blur(6px);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.25); }
+
+  /* ─── Animations ───────────────────────────────────────────── */
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+  @keyframes floatY   { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+  @keyframes pulseRing { 0% { box-shadow:0 0 0 0 rgba(14,127,116,.4); } 70% { box-shadow:0 0 0 18px rgba(14,127,116,0); } 100% { box-shadow:0 0 0 0 rgba(14,127,116,0); } }
+  @keyframes shimmer  { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+  @keyframes drawLine { from { width:0; } to { width:100%; } }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity .7s var(--ease), transform .7s var(--ease);
+  }
+  .reveal.visible { opacity:1; transform:none; }
+
+  /* ─── Nav ──────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 24px;
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow .3s;
+  }
+  nav.scrolled { box-shadow: 0 4px 24px rgba(13,43,69,.08); }
+  .nav-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 10px;
+    display: grid; place-items: center;
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  .nav-links {
+    display: flex; align-items: center; gap: 32px;
+    font-size: .9rem; font-weight: 500;
+  }
+  .nav-links a { color: var(--muted); transition: color .2s; }
+  .nav-links a:hover { color: var(--teal); }
+  .nav-cta { display: flex; align-items: center; gap: 12px; }
+  .hamburger { display: none; cursor: pointer; padding: 8px; border:none; background:none; }
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: var(--navy); border-radius: 2px;
+    transition: .3s;
+  }
+  .hamburger span + span { margin-top: 5px; }
+
+  /* Mobile nav */
+  .mobile-menu {
+    display: none;
+    position: fixed; inset: 68px 0 0 0; z-index: 99;
+    background: #fff;
+    flex-direction: column;
+    padding: 32px 24px;
+    gap: 24px;
+    border-top: 1px solid var(--border);
+    animation: fadeIn .2s var(--ease);
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { font-size: 1.1rem; font-weight: 500; color: var(--navy); padding: 10px 0; border-bottom: 1px solid var(--border); }
+
+  /* ─── Hero ─────────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    padding: 120px 24px 80px;
+    background:
+      radial-gradient(ellipse 70% 60% at 70% 50%, rgba(14,127,116,.08) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 10% 80%, rgba(13,43,69,.05) 0%, transparent 60%),
+      var(--cream);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    pointer-events: none;
+  }
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    pointer-events: none;
+  }
+  .hero-grid {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    width: 100%;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--teal);
+    background: var(--mint);
+    padding: 6px 14px 6px 8px;
+    border-radius: 99px;
+    margin-bottom: 24px;
+    animation: fadeUp .7s var(--ease) .1s both;
+  }
+  .hero-eyebrow-dot {
+    width: 20px; height: 20px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulseRing 2s infinite;
+    flex-shrink: 0;
+  }
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.1;
+    color: var(--navy);
+    margin-bottom: 22px;
+    animation: fadeUp .7s var(--ease) .2s both;
+  }
+  .hero-title em { font-style: italic; color: var(--teal); }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 480px;
+    margin-bottom: 36px;
+    animation: fadeUp .7s var(--ease) .3s both;
+  }
+  .hero-actions {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    animation: fadeUp .7s var(--ease) .4s both;
+  }
+  .hero-stats {
+    display: flex; gap: 32px;
+    margin-top: 48px;
+    animation: fadeUp .7s var(--ease) .5s both;
+  }
+  .stat-item { display: flex; flex-direction: column; }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 2rem; font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .stat-label { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+  .stat-divider { width: 1px; background: var(--border); }
+
+  /* Hero visual */
+  .hero-visual {
+    position: relative;
+    animation: fadeIn .9s var(--ease) .3s both;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .device-card {
+    background: var(--white);
+    border-radius: 28px;
+    box-shadow: var(--shadow), 0 2px 0 var(--border);
+    padding: 32px;
+    width: 100%;
+    max-width: 420px;
+    animation: floatY 5s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+  }
+  .device-screen {
+    background: linear-gradient(135deg, var(--navy) 0%, #0e4a6e 100%);
+    border-radius: 16px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .device-screen::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .scan-anim {
+    position: relative;
+    width: 80px; height: 80px;
+  }
+  .scan-ring {
+    position: absolute; inset:0;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,.15);
+  }
+  .scan-ring-active {
+    position: absolute; inset:8px;
+    border-radius: 50%;
+    border: 2px solid var(--teal-l);
+    animation: pulseRing 1.8s ease-out infinite;
+  }
+  .scan-icon {
+    position: absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .scan-icon svg { width:36px; height:36px; }
+  .scan-bar {
+    position:absolute;
+    left:0; right:0;
+    height:2px;
+    background: linear-gradient(90deg, transparent, var(--teal-l), transparent);
+    animation: scanMove 2s ease-in-out infinite;
+    top: 10%;
+  }
+  @keyframes scanMove {
+    0%   { top:10%; opacity:1; }
+    90%  { top:85%; opacity:1; }
+    100% { top:10%; opacity:0; }
+  }
+  .device-screen-text { color: #fff; font-size: .9rem; opacity: .7; }
+  .result-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--sky);
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  .result-row:last-child { margin-bottom: 0; }
+  .result-label { font-size: .85rem; color: var(--muted); font-weight: 500; }
+  .result-value { font-weight: 700; font-size: .95rem; }
+  .result-value.good  { color: var(--teal); }
+  .result-value.warn  { color: #e98a00; }
+  .badge-live {
+    position: absolute;
+    top: -12px; right: 20px;
+    background: #fff;
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-size: .75rem; font-weight: 700;
+    color: var(--teal);
+    box-shadow: 0 4px 16px rgba(14,127,116,.2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulseRing 1.5s infinite;
+  }
+  .hero-bg-blob {
+    position: absolute;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(14,127,116,.12), transparent 70%);
+    border-radius: 50%;
+    top: -40px; right: -40px;
+    z-index: 1;
+  }
+
+  /* ─── Logos/Trust Bar ──────────────────────────────────────── */
+  #trust {
+    padding: 32px 24px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+  }
+  .trust-inner {
+    max-width: var(--max); margin: 0 auto;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 32px;
+    justify-content: center;
+  }
+  .trust-label { font-size: .8rem; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .trust-logos {
+    display: flex; flex-wrap: wrap; gap: 32px; align-items: center;
+  }
+  .trust-logo {
+    font-family: var(--font-head);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #c0cdd4;
+    letter-spacing: .02em;
+    transition: color .2s;
+    white-space: nowrap;
+  }
+  .trust-logo:hover { color: var(--muted); }
+
+  /* ─── Value Props ──────────────────────────────────────────── */
+  #value {
+    padding: 100px 24px;
+    background: var(--cream);
+  }
+  .value-grid {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .value-content .section-sub { margin-bottom: 40px; }
+  .value-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .value-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .value-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .value-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--sky);
+    display: grid; place-items: center;
+    margin-bottom: 14px;
+  }
+  .value-icon svg { width: 24px; height: 24px; }
+  .value-card h4 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .value-card p  { font-size: .875rem; color: var(--muted); line-height: 1.55; }
+
+  /* ─── Features ─────────────────────────────────────────────── */
+  #features {
+    padding: 100px 24px;
+    background: var(--white);
+  }
+  .features-header { text-align: center; margin-bottom: 60px; }
+  .features-header .section-sub { margin: 0 auto; }
+  .features-grid {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .feature-card {
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    transition: all .3s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--teal-l));
+    transform: scaleX(0);
+    transition: transform .3s var(--ease);
+    transform-origin: left;
+  }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-card:hover { box-shadow: var(--shadow); transform: translateY(-4px); }
+  .feature-num {
+    font-family: var(--font-head);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--mint);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .feature-card h3 { font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .feature-card p  { font-size: .9rem; color: var(--muted); line-height: 1.65; }
+  .feature-tag {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--teal);
+    font-size: .75rem; font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-top: 16px;
+  }
+
+  /* ─── How It Works ─────────────────────────────────────────── */
+  #how {
+    padding: 100px 24px;
+    background: linear-gradient(160deg, var(--navy) 0%, #0a3a5e 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  #how::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.05);
+    pointer-events: none;
+  }
+  .how-header { text-align: center; margin-bottom: 72px; }
+  .how-header .section-label { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+  .how-header .section-title { color: #fff; }
+  .how-header .section-sub   { color: rgba(255,255,255,.6); margin: 0 auto; }
+  .how-steps {
+    max-width: 880px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  .how-steps::before {
+    content: '';
+    position: absolute;
+    top: 44px; left: calc(16.66% + 20px); right: calc(16.66% + 20px);
+    height: 2px;
+    background: linear-gradient(90deg, rgba(14,127,116,.6), var(--teal-l), rgba(14,127,116,.6));
+  }
+  .step {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 0 20px;
+  }
+  .step-circle {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: rgba(14,127,116,.15);
+    border: 2px solid var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+    transition: all .3s;
+  }
+  .step-circle:hover { background: var(--teal); transform: scale(1.08); }
+  .step-circle svg { width: 36px; height: 36px; }
+  .step-num {
+    position: absolute; top: -8px; right: -8px;
+    width: 26px; height: 26px;
+    background: var(--teal);
+    border-radius: 50%;
+    font-size: .78rem; font-weight: 700;
+    color: #fff;
+    display: grid; place-items: center;
+  }
+  .step h3 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .step p  { font-size: .9rem; color: rgba(255,255,255,.6); line-height: 1.65; }
+
+  /* ─── Video Section ─────────────────────────────────────────── */
+  #demo-video {
+    padding: 100px 24px;
+    background: var(--sky);
+  }
+  .video-inner {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 72px;
+    align-items: center;
+  }
+  .video-content .section-sub { margin-bottom: 32px; }
+  .video-checklist { margin-bottom: 36px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    margin-bottom: 18px;
+  }
+  .check-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: var(--teal);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    margin-top: 2px;
+  }
+  .check-icon svg { width: 12px; height: 12px; }
+  .check-text strong { display: block; font-size: .95rem; font-weight: 600; color: var(--navy); }
+  .check-text span   { font-size: .875rem; color: var(--muted); }
+  .video-placeholder {
+    background: linear-gradient(135deg, var(--navy) 0%, #0e4a6e 100%);
+    border-radius: 24px;
+    aspect-ratio: 16 / 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .video-placeholder::before {
+    content: '';
+    position: absolute;
+    inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M0 0h80v80H0V0zm40 40c0 11.046-8.954 20-20 20S0 51.046 0 40s8.954-20 20-20 20 8.954 20 20zm40 0c0 11.046-8.954 20-20 20s-20-8.954-20-20 8.954-20 20-20 20 8.954 20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .play-btn {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,.15);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,.3);
+    transition: all .3s;
+    backdrop-filter: blur(8px);
+    animation: pulseRing 2s infinite;
+  }
+  .play-btn:hover { background: var(--teal); border-color: var(--teal); transform: scale(1.1); }
+  .play-btn svg { width: 28px; height: 28px; margin-left: 4px; }
+  .video-placeholder p { color: rgba(255,255,255,.5); font-size: .9rem; }
+  .video-tag {
+    position: absolute;
+    bottom: 20px; left: 20px;
+    background: rgba(14,127,116,.85);
+    color: #fff;
+    font-size: .78rem; font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 99px;
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ─── Testimonials ─────────────────────────────────────────── */
+  #testimonials {
+    padding: 100px 24px;
+    background: var(--white);
+  }
+  .testimonials-header { text-align: center; margin-bottom: 56px; }
+  .testimonials-header .section-sub { margin: 0 auto; }
+  .testimonials-grid {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .testimonial-card {
+    background: var(--cream);
+    border-radius: 20px;
+    padding: 32px 28px;
+    border: 1px solid var(--border);
+    transition: all .3s;
+    position: relative;
+  }
+  .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .quote-mark {
+    font-family: var(--font-head);
+    font-size: 5rem;
+    color: var(--mint);
+    line-height: .6;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .testimonial-card blockquote {
+    font-size: .95rem;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .testimonial-author {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .author-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--teal);
+    display: grid; place-items: center;
+    font-family: var(--font-head);
+    font-size: 1rem; font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .author-name  { font-weight: 700; font-size: .9rem; color: var(--navy); }
+  .author-title { font-size: .8rem; color: var(--muted); }
+  .stars { color: #f59e0b; font-size: .85rem; margin-bottom: 14px; letter-spacing: 2px; }
+
+  /* ─── CTA Banner ─────────────────────────────────────────────── */
+  #cta-banner {
+    padding: 80px 24px;
+    background: linear-gradient(130deg, var(--teal) 0%, #0d8a7e 50%, #0a6e65 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.1);
+    pointer-events: none;
+  }
+  #cta-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.1);
+    pointer-events: none;
+  }
+  .cta-banner-title {
+    font-family: var(--font-head);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: #fff;
+    margin-bottom: 16px;
+    position: relative; z-index: 2;
+  }
+  .cta-banner-sub {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,.8);
+    margin-bottom: 40px;
+    max-width: 560px;
+    margin-left: auto; margin-right: auto;
+    position: relative; z-index: 2;
+  }
+  .cta-banner-actions {
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    position: relative; z-index: 2;
+  }
+  .btn-white {
+    background: #fff;
+    color: var(--teal);
+    font-weight: 700;
+    box-shadow: 0 6px 28px rgba(0,0,0,.15);
+  }
+  .btn-white:hover { background: var(--sky); transform: translateY(-2px); }
+
+  /* ─── Contact ─────────────────────────────────────────────────── */
+  #contact {
+    padding: 100px 24px;
+    background: var(--cream);
+  }
+  .contact-grid {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .contact-info h2 {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .contact-info p { color: var(--muted); margin-bottom: 36px; }
+  .contact-item {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+  }
+  .contact-item-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    box-shadow: 0 2px 8px rgba(13,43,69,.06);
+  }
+  .contact-item-icon svg { width: 20px; height: 20px; }
+  .contact-item strong { display: block; font-size: .9rem; color: var(--navy); margin-bottom: 2px; }
+  .contact-item span   { font-size: .875rem; color: var(--muted); }
+  .contact-form {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 40px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .contact-form h3 {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    color: var(--navy);
+    margin-bottom: 28px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-group label { font-size: .85rem; font-weight: 600; color: var(--navy); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: .9rem;
+    color: var(--navy);
+    background: var(--white);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    resize: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(14,127,116,.12);
+  }
+  .form-submit { width: 100%; padding: 15px; font-size: 1rem; border-radius: 12px; }
+
+  /* ─── Footer ──────────────────────────────────────────────── */
+  footer {
+    background: var(--navy);
+    padding: 64px 24px 32px;
+  }
+  .footer-grid {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 48px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .footer-brand .logo { color: #fff; margin-bottom: 16px; }
+  .footer-brand p { font-size: .875rem; color: rgba(255,255,255,.5); line-height: 1.7; max-width: 280px; margin-bottom: 24px; }
+  .social-links { display: flex; gap: 12px; }
+  .social-link {
+    width: 38px; height: 38px;
+    background: rgba(255,255,255,.08);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    transition: background .2s;
+  }
+  .social-link:hover { background: var(--teal); }
+  .social-link svg { width: 18px; height: 18px; }
+  .footer-col h4 {
+    font-size: .875rem; font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .footer-col ul li { margin-bottom: 12px; }
+  .footer-col ul a { font-size: .875rem; color: rgba(255,255,255,.5); transition: color .2s; }
+  .footer-col ul a:hover { color: var(--teal-l); }
+  .footer-bottom {
+    max-width: var(--max); margin: 32px auto 0;
+    display: flex; flex-wrap: wrap; gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .8rem;
+    color: rgba(255,255,255,.35);
+  }
+  .footer-bottom a { color: rgba(255,255,255,.5); transition: color .2s; }
+  .footer-bottom a:hover { color: var(--teal-l); }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 30px; right: 30px;
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-size: .9rem;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .4s var(--ease);
+    z-index: 999;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { width: 22px; height: 22px; background: var(--teal); border-radius: 50%; display:grid; place-items:center; flex-shrink:0; }
+
+  /* ─── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .hero-grid        { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual      { order: -1; }
+    .device-card      { max-width: 360px; margin: 0 auto; }
+    .value-grid       { grid-template-columns: 1fr; gap: 48px; }
+    .features-grid    { grid-template-columns: 1fr 1fr; }
+    .how-steps        { grid-template-columns: 1fr; gap: 48px; }
+    .how-steps::before { display: none; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .contact-grid     { grid-template-columns: 1fr; gap: 48px; }
+    .footer-grid      { grid-template-columns: 1fr 1fr; }
+    .video-inner      { grid-template-columns: 1fr; gap: 48px; }
+    .nav-links, .nav-cta .btn-outline { display: none; }
+    .hamburger { display: block; }
+  }
+  @media (max-width: 600px) {
+    .features-grid    { grid-template-columns: 1fr; }
+    .value-cards      { grid-template-columns: 1fr; }
+    .form-row         { grid-template-columns: 1fr; }
+    .footer-grid      { grid-template-columns: 1fr; }
+    .hero-stats       { gap: 20px; }
+    .how-steps        { gap: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────────── -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 2C10 2 4 5 4 11a6 6 0 0012 0c0-6-6-9-6-9z" fill="white" fill-opacity=".9"/>
+          <path d="M7 13h6M10 10v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      OsteoScan<span style="color:var(--teal)"> Pro</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#value">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#testimonials">Testimonials</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#contact" class="btn btn-outline" style="padding:10px 22px;font-size:.88rem;">Contact Us</a>
+      <a href="#contact" class="btn btn-primary" style="padding:10px 22px;font-size:.88rem;">Book a Demo</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#value"        onclick="closeMobile()">About</a>
+  <a href="#features"     onclick="closeMobile()">Features</a>
+  <a href="#how"          onclick="closeMobile()">How It Works</a>
+  <a href="#testimonials" onclick="closeMobile()">Testimonials</a>
+  <a href="#contact"      onclick="closeMobile()">Contact</a>
+  <a href="#contact" class="btn btn-primary" style="text-align:center;" onclick="closeMobile()">Book a Demo</a>
+</div>
+
+<!-- ── Hero ───────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Bone Health Innovation
+      </div>
+      <h1 class="hero-title">Early Detection<br>for <em>Stronger Bones</em></h1>
+      <p class="hero-sub">OsteoScan Pro delivers real-time osteoporosis screening at the point of care — portable, affordable, and completely non-invasive. Protect your patients before fractures occur.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Request Demo
+        </a>
+        <a href="#how" class="btn btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+          How It Works
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">95%</span>
+          <span class="stat-label">Screening Accuracy</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">&lt;90s</span>
+          <span class="stat-label">Scan Duration</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num">200M+</span>
+          <span class="stat-label">Affected Globally</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-bg-blob"></div>
+      <div class="device-card">
+        <div class="badge-live">
+          <span class="live-dot"></span>
+          Live Analysis
+        </div>
+        <div class="device-screen">
+          <div class="scan-bar"></div>
+          <div class="scan-anim">
+            <div class="scan-ring"></div>
+            <div class="scan-ring-active"></div>
+            <div class="scan-icon">
+              <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="16" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+                <path d="M18 9v18M9 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="18" cy="18" r="4" fill="rgba(14,127,116,.6)" stroke="var(--teal-l)" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+          <span class="device-screen-text">Bone density scan in progress…</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">📊 T-Score</span>
+          <span class="result-value good">−0.8 (Normal)</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">🦴 Bone Density</span>
+          <span class="result-value good">1.14 g/cm²</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">⚠️ Fracture Risk</span>
+          <span class="result-value warn">Moderate – 12%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust Bar ───────────────────────────────────────────────── -->
+<section id="trust">
+  <div class="trust-inner">
+    <span class="trust-label">Trusted by healthcare institutions</span>
+    <div class="trust-logos">
+      <span class="trust-logo">Apollo Clinics</span>
+      <span class="trust-logo">WHO</span>
+      <span class="trust-logo">AIIMS</span>
+      <span class="trust-logo">MedTech India</span>
+      <span class="trust-logo">IOF</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Value Props ─────────────────────────────────────────────── -->
+<section id="value">
+  <div class="value-grid container" style="max-width:var(--max);padding:0 24px;">
+    <div class="value-content reveal">
+      <span class="section-label">Why OsteoScan Pro</span>
+      <h2 class="section-title">Redefining Bone Health Screening</h2>
+      <p class="section-sub">OsteoScan Pro is the world's most portable, affordable bone screening solution — designed for clinics, field hospitals, and remote communities where conventional DXA scans are unavailable.</p>
+    </div>
+    <div class="value-cards">
+      <div class="value-card reveal" style="transition-delay:.1s">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h4>Real-Time Results</h4>
+        <p>Receive bone density data and risk scores within 90 seconds at point of care.</p>
+      </div>
+      <div class="value-card reveal" style="transition-delay:.2s">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
+        </div>
+        <h4>Portable Device</h4>
+        <p>Compact and lightweight — take it to rural clinics, community health drives, or bedside.</p>
+      </div>
+      <div class="value-card reveal" style="transition-delay:.3s">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h4>Affordable Solution</h4>
+        <p>Fraction of traditional DXA scan costs — enabling mass screening programs worldwide.</p>
+      </div>
+      <div class="value-card reveal" style="transition-delay:.4s">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h4>Non-Invasive</h4>
+        <p>Zero radiation, no needles, no discomfort — just a gentle ultrasound-based scan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="features-header container" style="max-width:var(--max);padding:0 24px;">
+    <span class="section-label">Features & Benefits</span>
+    <h2 class="section-title">Everything You Need for<br>Proactive Bone Health</h2>
+    <p class="section-sub">Comprehensive diagnostic support designed for healthcare professionals and primary care settings.</p>
+  </div>
+  <div class="features-grid container" style="max-width:var(--max);padding-top:0;padding-bottom:0;padding-left:24px;padding-right:24px;">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <h3>Early Osteoporosis Detection</h3>
+      <p>Identify low bone density before fractures occur. Our WHO-calibrated T-score algorithm flags at-risk patients with clinical precision.</p>
+      <span class="feature-tag">Diagnostic</span>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:.1s">
+      <div class="feature-num">02</div>
+      <h3>Preventive Healthcare Support</h3>
+      <p>Integrated risk-stratification engine generates personalised care recommendations, lifestyle guidance, and follow-up scheduling.</p>
+      <span class="feature-tag">Preventive</span>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:.2s">
+      <div class="feature-num">03</div>
+      <h3>Clinic & Field Ready</h3>
+      <p>Works on battery power with offline data storage. Sync to cloud-based EMR systems when connected — perfect for remote outreach.</p>
+      <span class="feature-tag">Portable</span>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:.15s">
+      <div class="feature-num">04</div>
+      <h3>AI-Powered Analytics</h3>
+      <p>Machine learning models trained on 500 000+ scans continuously improve accuracy and surface population-level insights for researchers.</p>
+      <span class="feature-tag">AI / ML</span>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:.25s">
+      <div class="feature-num">05</div>
+      <h3>Digital Health Record</h3>
+      <p>Every scan creates a longitudinal bone-health record — track changes over time, monitor treatment efficacy, and export reports in seconds.</p>
+      <span class="feature-tag">EMR</span>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:.35s">
+      <div class="feature-num">06</div>
+      <h3>Multi-Language Interface</h3>
+      <p>Available in 14 languages with a simplified UI so any paramedic or health worker can operate the device after a 30-minute training session.</p>
+      <span class="feature-tag">Accessibility</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ─────────────────────────────────────────────── -->
+<section id="how">
+  <div class="how-header reveal">
+    <span class="section-label">The Process</span>
+    <h2 class="section-title">Three Steps to Bone Health Clarity</h2>
+    <p class="section-sub">From device power-on to printed report — in under two minutes.</p>
+  </div>
+  <div class="how-steps container" style="max-width:880px;padding:0 24px;">
+    <div class="step reveal">
+      <div class="step-circle">
+        <span class="step-num">1</span>
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="14" stroke="white" stroke-width="1.5" opacity=".4"/>
+          <circle cx="18" cy="18" r="7" stroke="var(--teal-l)" stroke-width="2"/>
+          <path d="M18 11v14M11 18h14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Scan</h3>
+      <p>Place the handheld probe on the patient's wrist or heel. The device emits safe, low-frequency ultrasound waves that penetrate bone tissue.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:.15s">
+      <div class="step-circle">
+        <span class="step-num">2</span>
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="10" width="20" height="16" rx="3" stroke="white" stroke-width="1.5" opacity=".4"/>
+          <path d="M13 18h10M13 14h6M13 22h4" stroke="var(--teal-l)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Analyse</h3>
+      <p>Our on-device AI processes the acoustic data in real time — computing speed of sound, attenuation, and stiffness index against WHO reference ranges.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:.3s">
+      <div class="step-circle">
+        <span class="step-num">3</span>
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="12" stroke="white" stroke-width="1.5" opacity=".4"/>
+          <path d="M13 18l4 4 7-8" stroke="var(--teal-l)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Instant Results</h3>
+      <p>T-score, Z-score, fracture risk percentage, and a colour-coded health status appear on screen — shareable via PDF, email, or EMR integration.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Demo Video Section ───────────────────────────────────────── -->
+<section id="demo-video">
+  <div class="video-inner">
+    <div class="video-content reveal">
+      <span class="section-label">See It In Action</span>
+      <h2 class="section-title">Watch OsteoScan Pro Deliver Results</h2>
+      <p class="section-sub">See a live screening demonstration from initial probe placement to final printed report — in real time.</p>
+      <div class="video-checklist">
+        <div class="check-item">
+          <span class="check-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="check-text">
+            <strong>90-second full screening</strong>
+            <span>From placement to complete bone density report</span>
+          </div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="check-text">
+            <strong>Clinical validation walkthrough</strong>
+            <span>Expert commentary from Dr. Priya Iyer, Endocrinology</span>
+          </div>
+        </div>
+        <div class="check-item">
+          <span class="check-icon">
+            <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div class="check-text">
+            <strong>EMR sync demonstration</strong>
+            <span>How results flow directly into patient records</span>
+          </div>
+        </div>
+      </div>
+      <a href="#contact" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Book a Live Demo
+      </a>
+    </div>
+    <div class="video-placeholder reveal" style="transition-delay:.2s">
+      <div class="play-btn" title="Watch Demo">
+        <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      <p>Product Demo Video</p>
+      <div class="video-tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        2 min 34 sec
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ─────────────────────────────────────────────── -->
+<section id="testimonials">
+  <div class="testimonials-header reveal">
+    <span class="section-label">Testimonials</span>
+    <h2 class="section-title">Trusted by Clinicians Worldwide</h2>
+    <p class="section-sub">Hear from doctors and healthcare professionals who've integrated OsteoScan Pro into their practice.</p>
+  </div>
+  <div class="testimonials-grid container" style="max-width:var(--max);padding:0 24px;">
+    <div class="testimonial-card reveal">
+      <span class="stars">★★★★★</span>
+      <span class="quote-mark">"</span>
+      <blockquote>OsteoScan Pro transformed our rural outreach camps. We screened 400 patients in a single day — something that was impossible with traditional DXA equipment. The accuracy is remarkable.</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">DR</div>
+        <div>
+          <div class="author-name">Dr. Rekha Sharma</div>
+          <div class="author-title">Senior Orthopaedic Surgeon, Apollo Hospitals</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:.1s">
+      <span class="stars">★★★★★</span>
+      <span class="quote-mark">"</span>
+      <blockquote>The portability is a game-changer for primary care. My nurses can operate it independently after just one training session, and patients love the immediate visual feedback on screen.</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:var(--navy);">AK</div>
+        <div>
+          <div class="author-name">Dr. Arun Kumar</div>
+          <div class="author-title">Family Medicine Physician, Bengaluru</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:.2s">
+      <span class="stars">★★★★★</span>
+      <span class="quote-mark">"</span>
+      <blockquote>As a researcher, having longitudinal bone health records automatically generated and exportable in structured formats has significantly accelerated our epidemiological studies.</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#0a5c54;">PM</div>
+        <div>
+          <div class="author-name">Prof. Meena Patel</div>
+          <div class="author-title">Endocrinology Research, AIIMS Delhi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Banner ───────────────────────────────────────────────── -->
+<section id="cta-banner">
+  <h2 class="cta-banner-title reveal">Ready to Transform Bone Health<br>Screening at Your Clinic?</h2>
+  <p class="cta-banner-sub reveal" style="transition-delay:.1s">Join 200+ healthcare facilities already using OsteoScan Pro. Request a personalised demo today — no commitment required.</p>
+  <div class="cta-banner-actions reveal" style="transition-delay:.2s">
+    <a href="#contact" class="btn btn-white">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>
+      Book a Demo
+    </a>
+    <a href="#features" class="btn btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      Learn More
+    </a>
+  </div>
+</section>
+
+<!-- ── Contact ─────────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="contact-info reveal">
+      <span class="section-label">Get In Touch</span>
+      <h2>Let's Bring OsteoScan Pro to Your Facility</h2>
+      <p>Whether you're a clinician, clinic owner, or researcher, our team is ready to walk you through a personalised demonstration and discuss pricing, integration, and implementation.</p>
+      <div class="contact-item">
+        <div class="contact-item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <strong>Email</strong>
+          <span>contact@osteocanpro.health</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 13.5a19.79 19.79 0 01-3.07-8.67A2 2 0 012 2.84h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 10.9a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 17.92z"/></svg>
+        </div>
+        <div>
+          <strong>Phone</strong>
+          <span>+91 98765 43210</span>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div>
+          <strong>Address</strong>
+          <span>MedTech Hub, Coimbatore, Tamil Nadu, India</span>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form reveal" style="transition-delay:.15s">
+      <h3>Send Us a Message</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input type="text" id="fname" placeholder="Dr. Priya" />
+        </div>
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input type="text" id="lname" placeholder="Sharma" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="priya@hospital.com" />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" placeholder="+91 98765 43210" />
+      </div>
+      <div class="form-group">
+        <label for="role">I am a…</label>
+        <select id="role">
+          <option value="">Select your role</option>
+          <option>Physician / Specialist</option>
+          <option>Clinic Owner / Administrator</option>
+          <option>Hospital Procurement</option>
+          <option>Researcher / Academic</option>
+          <option>NGO / Public Health</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="msg">Message</label>
+        <textarea id="msg" rows="4" placeholder="Tell us about your facility and how you'd like to use OsteoScan Pro…"></textarea>
+      </div>
+      <button class="btn btn-primary form-submit" onclick="submitForm()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Message
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 4 5 4 11a6 6 0 0012 0c0-6-6-9-6-9z" fill="white" fill-opacity=".9"/><path d="M7 13h6M10 10v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        OsteoScan Pro
+      </a>
+      <p>Pioneering real-time bone health screening technology for a world where osteoporosis is detected early, treated promptly, and no fracture goes unforewarned.</p>
+      <div class="social-links">
+        <!-- LinkedIn -->
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z"/></svg>
+        </a>
+        <!-- Twitter/X -->
+        <a href="#" class="social-link" aria-label="Twitter">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
+        </a>
+        <!-- YouTube -->
+        <a href="#" class="social-link" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.4a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white" stroke="none"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#value">Overview</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#demo-video">Demo Video</a></li>
+        <li><a href="#contact">Pricing</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Clinical Studies</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#contact">Contact Us</a></li>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Training Portal</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Use</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 OsteoScan Pro Technologies Pvt. Ltd. All rights reserved.</span>
+    <span>
+      <a href="#">Privacy</a> &nbsp;·&nbsp;
+      <a href="#">Terms</a> &nbsp;·&nbsp;
+      <a href="#">Cookies</a>
+    </span>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+  </span>
+  Message sent! We'll be in touch within 24 hours.
+</div>
+
+<script>
+  /* ── Nav scroll ───────────────────────────────────── */
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  /* ── Mobile menu ──────────────────────────────────── */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobile() {
+    mobileMenu.classList.remove('open');
+  }
+
+  /* ── Scroll reveal ────────────────────────────────── */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  /* ── Contact form submit ──────────────────────────── */
+  function submitForm() {
+    const fname = document.getElementById('fname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!fname || !email) {
+      alert('Please enter at least your name and email.');
+      return;
+    }
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+    // reset
+    ['fname','lname','email','phone','msg'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('role').value = '';
+  }
+
+  /* ── Play button ──────────────────────────────────── */
+  document.querySelector('.play-btn').addEventListener('click', () => {
+    alert('Demo video coming soon! Book a live demo via the contact form below.');
+  });
+</script>
+
+</body>
+</html>
