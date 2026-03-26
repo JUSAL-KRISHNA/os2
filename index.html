@@ -748,7 +748,7 @@
     max-width: var(--max); margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1.3fr;
-    gap: 80px;
+    gap: clamp(40px, 6vw, 80px);
     align-items: start;
   }
   .contact-info h2 {
@@ -1131,11 +1131,11 @@
     <p class="section-sub">A simple, non-invasive process for early osteoporosis detection.</p>
   </div>
   
-  <div class="container reveal" style="max-width: 900px; padding: 0 24px; text-align: center; margin-bottom: 60px;">
-    <img src="device-photo.png" alt="BP-style sensor band" style="max-width: 100%; border-radius: 20px; box-shadow: 0 8px 40px rgba(13,43,69,.2); margin: 0 auto; display: block;" />
+  <div class="container reveal" style="max-width: 900px; padding: 0 24px; text-align: center; margin-bottom: clamp(30px, 5vw, 60px);">
+    <img src="device-photo.png" alt="BP-style sensor band" style="max-width: 100%; height: auto; border-radius: 20px; box-shadow: 0 8px 40px rgba(13,43,69,.2); margin: 0 auto; display: block;" />
   </div>
 
-  <div class="how-steps-flex container" style="max-width:1100px; padding:0 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px;">
+  <div class="how-steps-flex container" style="max-width:1100px; padding:0 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 3vw, 30px);">
     
     <!-- Step 1 -->
     <div class="step reveal" style="flex: 1 1 160px; max-width: 220px; padding: 0;">
@@ -1330,7 +1330,7 @@
         </div>
         <div>
           <strong>Email</strong>
-          <span>contact@osteocanpro.health</span>
+          <a href="mailto:biopulse@gmail.com">biopulse@gmail.com</a>
         </div>
       </div>
       <div class="contact-item">
@@ -1339,7 +1339,7 @@
         </div>
         <div>
           <strong>Phone</strong>
-          <span>+91 98765 43210</span>
+          <span>+91 87782 73789<br>+91 6379075558</span>
         </div>
       </div>
       <div class="contact-item">
@@ -1348,7 +1348,7 @@
         </div>
         <div>
           <strong>Address</strong>
-          <span>MedTech Hub, Coimbatore, Tamil Nadu, India</span>
+          <span>Karunya Institute of Technology and Sciences</span>
         </div>
       </div>
     </div>
