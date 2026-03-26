@@ -182,8 +182,7 @@
 
   /* ─── Hero ─────────────────────────────────────────────────── */
   #hero {
-    min-height: 100vh;
-    padding: 120px 24px 80px;
+    padding: clamp(140px, 15vh, 180px) 24px clamp(60px, 8vh, 100px);
     background:
       radial-gradient(ellipse 70% 60% at 70% 50%, rgba(14,127,116,.08) 0%, transparent 70%),
       radial-gradient(ellipse 50% 40% at 10% 80%, rgba(13,43,69,.05) 0%, transparent 60%),
